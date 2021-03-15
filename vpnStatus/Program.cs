@@ -14,7 +14,7 @@ namespace vpnStatus {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.Run(new vpnApplication());
+            Application.Run(new VpnStatusApp());
 
         }
     }

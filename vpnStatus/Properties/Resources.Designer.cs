@@ -59,5 +59,25 @@ namespace vpnStatus.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Active {
+            get {
+                object obj = ResourceManager.GetObject("Active", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon Inactive {
+            get {
+                object obj = ResourceManager.GetObject("Inactive", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }
