@@ -68,7 +68,7 @@ namespace vpnStatus {
             while (!proc.StandardOutput.EndOfStream) {
                 string line = proc.StandardOutput.ReadLine();
 
-                if (line.Contains(vpnName)) {
+                if (line.Contains(vpnName) && line.Contains(" Connected")) {
                     found = true;
                     break;
                 }
