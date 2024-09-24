@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Windows.Forms;
 
 namespace vpnStatus {
-
     public class VpnStatusApp : ApplicationContext {
-
         private NotifyIcon vpnNotifyIcon;
         private ContextMenuStrip vpnMenu;
         private ToolStripMenuItem exitMenuItem;
         private Timer myTimer;
-        private string vpnName;
+        private readonly List<String> vpns = new List<String>();
 
         public VpnStatusApp() {
             Init();
-            ScanNetwork(vpnName);
+            ScanNetwork(vpns);
             myTimer.Enabled = true;
         }
 
@@ -40,51 +40,50 @@ namespace vpnStatus {
             vpnNotifyIcon.Text = "VPN Status";
             vpnNotifyIcon.Visible = true;
 
-            myTimer = new Timer {
+            foreach (var v in Properties.Settings.Default.VpnList.Split(',')) {
+                vpns.Add(v.Trim());
+            }
+
+            myTimer = new Timer
+            {
                 Enabled = false,
+                // in milliseconds
                 Interval = 3000
             };
 
             myTimer.Tick += new EventHandler(this.TimerElapsed);
 
-            vpnName = Properties.Settings.Default.VpnName;
         }
 
-        private void ScanNetwork(string vpnName) {
 
-            var proc = new Process {
-                StartInfo = new ProcessStartInfo {
-                    FileName = "CMD.EXE",
-                    Arguments = "/C netsh interface show interface",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
-
+        private void ScanNetwork(List<String> vpns) {
             bool found = false;
+            string connectedVpns = "";
 
-            proc.Start();
-            while (!proc.StandardOutput.EndOfStream) {
-                string line = proc.StandardOutput.ReadLine();
-
-                if (line.Contains(vpnName) && line.Contains(" Connected")) {
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces()) {
+                if (vpns.Contains(ni.Name) && ni.OperationalStatus == OperationalStatus.Up) {
+                    connectedVpns = connectedVpns + ni.Name + Environment.NewLine;
                     found = true;
-                    break;
+
+                    if (vpns.Count == 1) {
+                        break;
+                    }
                 }
             }
 
             if (found) {
+                vpnNotifyIcon.Text = "VPN Status - Connected:" + Environment.NewLine + connectedVpns;
                 this.vpnNotifyIcon.Icon = Properties.Resources.Active;
             }
             else {
+                vpnNotifyIcon.Text = "VPN Status - Not connected";
                 this.vpnNotifyIcon.Icon = Properties.Resources.Inactive;
             }
 
         }
 
         private void TimerElapsed(object sender, EventArgs e) {
-            ScanNetwork(vpnName);
+            ScanNetwork(vpns);
         }
 
         private void ExitMenuItem_Click(object sender, EventArgs e) {
